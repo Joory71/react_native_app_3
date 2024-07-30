@@ -7,7 +7,7 @@ import ImagePickerComponent from './components/ImagePickerComponent';
 import ImageWithTags from './components/ImageWithTags';
 import Loader from './components/Loader';
 
-const API_KEY = '262fb086cd11243e589f62c6d6fb04e8';
+const API_KEY = 'APIKEY';
 
 export default function App() {
   const [location, setLocation] = useState(null);

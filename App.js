@@ -1,80 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
-import * as Location from 'expo-location';
-import axios from 'axios';
-import Weather from './components/Weather';
-import ImagePickerComponent from './components/ImagePickerComponent';
-import ImageWithTags from './components/ImageWithTags';
-import Loader from './components/Loader';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Provider } from 'react-redux';
+import { store } from './store';
+import HomeScreen from './screens/HomeScreen';
+import CitiesScreen from './screens/CitiesScreen';
+import FavoritesScreen from './screens/FavoritesScreen';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-const API_KEY = 'APIKEY';
+const Tab = createBottomTabNavigator();
 
 export default function App() {
-  const [location, setLocation] = useState(null);
-  const [weather, setWeather] = useState(null);
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Permission to access location was denied');
-        return;
-      }
-
-      let loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc);
-
-      try {
-        const response = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
-          params: {
-            lat: loc.coords.latitude,
-            lon: loc.coords.longitude,
-            units: 'metric',
-            appid: API_KEY,
-          },
-        });
-        setWeather(response.data);
-      } catch (error) {
-        console.error(error);
-        alert('Failed to fetch weather data. Please check your API key.');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  const handleImagesPicked = (pickedImages) => {
-    setImages([...images, ...pickedImages]);
-  };
-
-  if (loading) {
-    return <Loader />;
-  }
-
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {weather && <Weather weather={weather} />}
-      <ImagePickerComponent onImagesPicked={handleImagesPicked} />
-      <View style={styles.imagesContainer}>
-        {images.map((image, index) => (
-          <ImageWithTags key={index} image={image} />
-        ))}
-      </View>
-    </ScrollView>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName;
+
+              if (route.name === 'Home') {
+                iconName = focused ? 'home' : 'home-outline';
+              } else if (route.name === 'Cities') {
+                iconName = focused ? 'list' : 'list-outline';
+              } else if (route.name === 'Favorites') {
+                iconName = focused ? 'heart' : 'heart-outline';
+              }
+
+              return <Icon name={iconName} size={size} color={color} />;
+            },
+          })}
+          tabBarOptions={{
+            activeTintColor: 'tomato',
+            inactiveTintColor: 'gray',
+          }}
+        >
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Cities" component={CitiesScreen} />
+          <Tab.Screen name="Favorites" component={FavoritesScreen} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  imagesContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
-});

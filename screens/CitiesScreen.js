@@ -6,7 +6,7 @@ import Weather from '../components/Weather';
 import Loader from '../components/Loader';
 import { addCity } from '../features/cities/citiesSlice';
 
-const API_KEY = '262fb086cd11243e589f62c6d6fb04e8';
+const API_KEY = 'APIKEY';
 
 const CitiesScreen = () => {
   const [city, setCity] = useState('');
